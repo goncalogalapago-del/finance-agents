@@ -28,6 +28,8 @@ Internal services/modules:
 - `suggestions.engine` (proposal generation with risk gates/allowlist)
 - `macro.digest` (source collection + LLM narrative mapped to exposure)
 - `reporting.composer` (email/slack formatting)
+- `interaction.gateway` (NL intent classification + safe routing to typed modules)
+- `interaction.channels` (API/CLI/Slack/email adapters on a shared interaction contract)
 - `orchestrator.jobs` (monthly workflows, optional weekly ingestion)
 - `audit.log` (append-only event store)
 
@@ -77,6 +79,22 @@ Failure strategy:
 - APScheduler or cron + worker entrypoint
 - SMTP provider and optional Slack webhook
 - pytest + ruff + mypy + safety/pip-audit in CI
+
+## Natural Language Interaction Surfaces
+
+Natural language interactions are supported over:
+- API
+- CLI
+- Slack
+- Email
+
+All channels route through a shared interaction gateway and remain constrained by the constitution:
+- no execution path in MVP v0
+- deterministic modules for analytics/risk/tax/proposals
+- LLM limited to narrative/explanation
+- append-only audit events for all interaction lifecycle events
+
+See `docs/06-agent-interaction-spec.md` for persona definitions, channel contracts, and API/CLI/Slack/email behavior.
 
 ## Deliverables from This Architecture
 

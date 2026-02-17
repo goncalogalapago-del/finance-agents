@@ -68,6 +68,20 @@ Acceptance criteria:
 - Re-runs are idempotent.
 - Audit trail complete for ingest/report/proposal lifecycle.
 
+## Milestone 7 - Natural Language Interaction Surfaces
+
+1. Add interaction gateway endpoint for intent routing to typed modules.
+2. Define and expose agent personas and persona-aware routing.
+3. Add CLI client that uses the same interaction API contract.
+4. Add Slack adapter (mentions/slash commands + outbound summaries).
+5. Add email adapter (monthly delivery plus optional inbound Q and A).
+6. Extend audit events for interaction lifecycle and channel metadata.
+
+Acceptance criteria:
+- Users can ask natural language questions over API, CLI, Slack, and email.
+- Routing preserves constitution constraints (no execution path in MVP).
+- Every interaction is auditable with channel, actor, and correlation ids.
+
 ## Initial API Surface (MVP)
 
 - `POST /jobs/ingestion/run`
@@ -79,4 +93,6 @@ Acceptance criteria:
 - `POST /proposals/{proposal_id}/approve`
 - `POST /proposals/{proposal_id}/reject`
 - `POST /system/kill-switch/{enabled}`
-
+- `POST /agents/interactions`
+- `GET /agents/interactions/{interaction_id}`
+- `GET /agents/personas`

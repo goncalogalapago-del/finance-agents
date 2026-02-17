@@ -53,6 +53,32 @@ def test_request_raises_after_max_retries(monkeypatch: pytest.MonkeyPatch) -> No
     assert sleeps == [0.1, 0.2]
 
 
+def test_request_retries_http_5xx_and_then_succeeds(monkeypatch: pytest.MonkeyPatch) -> None:
+    client = RetryRateLimitedHttpClient(max_retries=2, backoff_seconds=0.1, requests_per_second=0)
+    attempts = {"count": 0}
+    sleeps: list[float] = []
+
+    def _request_with_5xx_once(method: str, url: str, **kwargs: object) -> httpx.Response:
+        del kwargs
+        attempts["count"] += 1
+        request = httpx.Request(method, url)
+        if attempts["count"] == 1:
+            return httpx.Response(500, request=request)
+        return httpx.Response(200, request=request)
+
+    monkeypatch.setattr(client._client, "request", _request_with_5xx_once)
+    monkeypatch.setattr(
+        "app.adapters.http_client.time.sleep", lambda seconds: sleeps.append(seconds)
+    )
+
+    response = client.request("GET", "https://example.com")
+    client.close()
+
+    assert response.status_code == 200
+    assert attempts["count"] == 2
+    assert sleeps == [0.1]
+
+
 def test_apply_rate_limit_sleeps_for_remaining_interval(monkeypatch: pytest.MonkeyPatch) -> None:
     client = RetryRateLimitedHttpClient(requests_per_second=2.0)
     sleeps: list[float] = []

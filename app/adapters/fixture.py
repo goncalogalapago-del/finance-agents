@@ -10,6 +10,9 @@ from app.adapters.contracts import (
     TransactionDTO,
 )
 
+FIXTURE_SNAPSHOT_UTC = datetime(2026, 1, 31, 16, 0, tzinfo=timezone.utc)
+FIXTURE_EXECUTED_UTC = datetime(2026, 1, 29, 16, 0, tzinfo=timezone.utc)
+
 
 class FixtureReadOnlyAdapter(ReadOnlyFinanceAdapter):
     """Deterministic adapter used to wire ingestion flow before provider APIs."""
@@ -30,11 +33,10 @@ class FixtureReadOnlyAdapter(ReadOnlyFinanceAdapter):
         ]
 
     def fetch_balances(self, since_utc: datetime) -> Iterable[BalanceDTO]:
-        as_of = datetime.now(timezone.utc).replace(microsecond=0)
         return [
             BalanceDTO(
                 external_account_id="fixture-broker-001",
-                as_of_utc=as_of,
+                as_of_utc=FIXTURE_SNAPSHOT_UTC,
                 currency="USD",
                 balance_amount=Decimal("10250.15"),
                 available_amount=Decimal("1250.15"),
@@ -42,12 +44,11 @@ class FixtureReadOnlyAdapter(ReadOnlyFinanceAdapter):
         ]
 
     def fetch_positions(self, since_utc: datetime) -> Iterable[PositionDTO]:
-        as_of = datetime.now(timezone.utc).replace(microsecond=0)
         return [
             PositionDTO(
                 external_account_id="fixture-broker-001",
                 instrument_ref="US0378331005",
-                as_of_utc=as_of,
+                as_of_utc=FIXTURE_SNAPSHOT_UTC,
                 quantity=Decimal("12.0"),
                 avg_cost=Decimal("165.00"),
                 market_price=Decimal("190.00"),
@@ -56,7 +57,6 @@ class FixtureReadOnlyAdapter(ReadOnlyFinanceAdapter):
         ]
 
     def fetch_transactions(self, since_utc: datetime) -> Iterable[TransactionDTO]:
-        executed = datetime.now(timezone.utc).replace(microsecond=0) - timedelta(days=2)
         return [
             TransactionDTO(
                 external_account_id="fixture-broker-001",
@@ -64,8 +64,8 @@ class FixtureReadOnlyAdapter(ReadOnlyFinanceAdapter):
                 txn_type="dividend",
                 trade_side=None,
                 instrument_ref="US0378331005",
-                executed_at_utc=executed,
-                settled_at_utc=executed,
+                executed_at_utc=FIXTURE_EXECUTED_UTC,
+                settled_at_utc=FIXTURE_EXECUTED_UTC + timedelta(days=1),
                 quantity=None,
                 price=None,
                 gross_amount=Decimal("10.00"),
