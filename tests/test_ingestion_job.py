@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import sessionmaker
 
+from app.adapters.contracts import AdapterCapabilities, InstitutionKind
 from app.api.jobs import (
     IngestionPreflightRequest,
     IngestionRunRequest,
@@ -77,6 +78,8 @@ def test_ingestion_job_all_sources_works_with_default_registry(client: TestClien
 
 class _ReadyAdapter:
     provider_code = "READY"
+    institution_kind = InstitutionKind.BANK
+    capabilities = AdapterCapabilities()
 
     def validate_read_only_scope(self) -> None:
         return None

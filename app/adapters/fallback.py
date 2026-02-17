@@ -24,7 +24,14 @@ class FallbackReadOnlyAdapter(ReadOnlyFinanceAdapter):
                 "Fallback adapter provider_code must match primary provider_code "
                 f"({primary.provider_code} != {fallback.provider_code})"
             )
+        if primary.institution_kind != fallback.institution_kind:
+            raise ValueError(
+                "Fallback adapter institution_kind must match primary institution_kind "
+                f"({primary.institution_kind} != {fallback.institution_kind})"
+            )
         self.provider_code = primary.provider_code
+        self.institution_kind = primary.institution_kind
+        self.capabilities = primary.capabilities
         self._primary = primary
         self._fallback = fallback
 

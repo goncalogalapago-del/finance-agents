@@ -7,7 +7,9 @@ from typing import Any, Protocol
 
 from app.adapters.contracts import (
     AccountDTO,
+    AdapterCapabilities,
     BalanceDTO,
+    InstitutionKind,
     PositionDTO,
     ReadOnlyFinanceAdapter,
     TransactionDTO,
@@ -29,6 +31,8 @@ class _HttpClient(Protocol):
 
 class SaxoReadOnlyAdapter(ReadOnlyFinanceAdapter):
     provider_code = "SAXO"
+    institution_kind = InstitutionKind.BROKER
+    capabilities = AdapterCapabilities()
     _FORBIDDEN_SCOPE_TOKENS = ("trade", "write", "order")
 
     def __init__(

@@ -2,7 +2,21 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from enum import Enum
 from typing import Optional, Protocol
+
+
+class InstitutionKind(str, Enum):
+    BROKER = "BROKER"
+    BANK = "BANK"
+
+
+@dataclass(frozen=True)
+class AdapterCapabilities:
+    supports_accounts: bool = True
+    supports_balances: bool = True
+    supports_positions: bool = True
+    supports_transactions: bool = True
 
 
 @dataclass(frozen=True)
@@ -54,6 +68,8 @@ class TransactionDTO:
 
 class ReadOnlyFinanceAdapter(Protocol):
     provider_code: str
+    institution_kind: InstitutionKind
+    capabilities: AdapterCapabilities
 
     def validate_read_only_scope(self) -> None:
         ...

@@ -30,6 +30,18 @@ class Settings(BaseSettings):
     lunar_csv_dir: Optional[str] = Field(default=None, alias="LUNAR_CSV_DIR")
     lunar_device_id: str = Field(default="finance-agents", alias="LUNAR_DEVICE_ID")
     lunar_os: str = Field(default="linux", alias="LUNAR_OS")
+    santander_totta_base_url: str = Field(
+        default="https://api.santander.pt/open-banking/v1",
+        alias="SANTANDER_TOTTA_BASE_URL",
+    )
+    santander_totta_access_token: Optional[str] = Field(
+        default=None,
+        alias="SANTANDER_TOTTA_ACCESS_TOKEN",
+    )
+    santander_totta_csv_dir: Optional[str] = Field(
+        default=None,
+        alias="SANTANDER_TOTTA_CSV_DIR",
+    )
 
 
 @lru_cache(maxsize=1)

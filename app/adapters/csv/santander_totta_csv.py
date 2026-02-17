@@ -17,20 +17,23 @@ from app.adapters.contracts import (
 )
 
 
-class LunarCsvReadOnlyAdapter(ReadOnlyFinanceAdapter):
-    provider_code = "LUNAR"
+class SantanderTottaCsvReadOnlyAdapter(ReadOnlyFinanceAdapter):
+    provider_code = "SANTANDER_TOTTA"
     institution_kind = InstitutionKind.BANK
-    capabilities = AdapterCapabilities()
+    capabilities = AdapterCapabilities(supports_positions=False)
 
     def __init__(self, *, csv_dir: str) -> None:
         self._csv_dir = Path(csv_dir).expanduser()
 
     def validate_read_only_scope(self) -> None:
         if not self._csv_dir.exists() or not self._csv_dir.is_dir():
-            raise ValueError(f"Lunar CSV directory does not exist: {self._csv_dir}")
+            raise ValueError(f"Santander Totta CSV directory does not exist: {self._csv_dir}")
         accounts_path = self._csv_dir / "accounts.csv"
         if not accounts_path.exists():
-            raise ValueError(f"Lunar CSV fallback requires accounts.csv at {accounts_path}")
+            raise ValueError(
+                "Santander Totta CSV fallback requires accounts.csv "
+                f"at {accounts_path}"
+            )
 
     def list_accounts(self) -> list[AccountDTO]:
         accounts: list[AccountDTO] = []
@@ -63,23 +66,8 @@ class LunarCsvReadOnlyAdapter(ReadOnlyFinanceAdapter):
         return balances
 
     def fetch_positions(self, since_utc: datetime) -> list[PositionDTO]:
-        positions: list[PositionDTO] = []
-        for row in self._rows("positions.csv"):
-            as_of_utc = self._datetime(self._required_str(row, "as_of_utc"))
-            if as_of_utc < self._normalize_utc(since_utc):
-                continue
-            positions.append(
-                PositionDTO(
-                    external_account_id=self._required_str(row, "external_account_id"),
-                    instrument_ref=self._required_str(row, "instrument_ref"),
-                    as_of_utc=as_of_utc,
-                    quantity=self._decimal(self._required_str(row, "quantity")),
-                    avg_cost=self._optional_decimal(row.get("avg_cost")),
-                    market_price=self._optional_decimal(row.get("market_price")),
-                    market_value=self._optional_decimal(row.get("market_value")),
-                )
-            )
-        return positions
+        del since_utc
+        return []
 
     def fetch_transactions(self, since_utc: datetime) -> list[TransactionDTO]:
         transactions: list[TransactionDTO] = []
@@ -92,12 +80,12 @@ class LunarCsvReadOnlyAdapter(ReadOnlyFinanceAdapter):
                     external_account_id=self._required_str(row, "external_account_id"),
                     external_txn_id=self._required_str(row, "external_txn_id"),
                     txn_type=self._required_str(row, "txn_type"),
-                    trade_side=self._optional_str(row.get("trade_side")),
-                    instrument_ref=self._optional_str(row.get("instrument_ref")),
+                    trade_side=None,
+                    instrument_ref=None,
                     executed_at_utc=executed_at_utc,
                     settled_at_utc=self._optional_datetime(row.get("settled_at_utc")),
-                    quantity=self._optional_decimal(row.get("quantity")),
-                    price=self._optional_decimal(row.get("price")),
+                    quantity=None,
+                    price=None,
                     gross_amount=self._optional_decimal(row.get("gross_amount")),
                     fee_amount=self._optional_decimal(row.get("fee_amount")),
                     tax_amount=self._optional_decimal(row.get("tax_amount")),
@@ -120,10 +108,12 @@ class LunarCsvReadOnlyAdapter(ReadOnlyFinanceAdapter):
     def _required_str(row: dict[str, Any], key: str) -> str:
         value = row.get(key)
         if value is None:
-            raise ValueError(f"Lunar CSV row missing required column `{key}`")
+            raise ValueError(f"Santander Totta CSV row missing required column `{key}`")
         text = str(value).strip()
         if not text:
-            raise ValueError(f"Lunar CSV row has empty value for required column `{key}`")
+            raise ValueError(
+                f"Santander Totta CSV row has empty value for required column `{key}`"
+            )
         return text
 
     @staticmethod
@@ -138,7 +128,9 @@ class LunarCsvReadOnlyAdapter(ReadOnlyFinanceAdapter):
         try:
             return Decimal(str(raw))
         except Exception as exc:
-            raise ValueError(f"Invalid decimal value `{raw}` in Lunar CSV input") from exc
+            raise ValueError(
+                f"Invalid decimal value `{raw}` in Santander Totta CSV input"
+            ) from exc
 
     @classmethod
     def _optional_decimal(cls, raw: Any) -> Decimal | None:
@@ -150,6 +142,8 @@ class LunarCsvReadOnlyAdapter(ReadOnlyFinanceAdapter):
     @staticmethod
     def _datetime(raw: str) -> datetime:
         normalized = raw.strip().replace("Z", "+00:00")
+        if "T" not in normalized:
+            normalized = f"{normalized}T00:00:00+00:00"
         parsed = datetime.fromisoformat(normalized)
         if parsed.tzinfo is None:
             return parsed.replace(tzinfo=timezone.utc)
@@ -172,5 +166,5 @@ class LunarCsvReadOnlyAdapter(ReadOnlyFinanceAdapter):
     def _currency(raw: str) -> str:
         currency = raw.strip().upper()
         if len(currency) != 3:
-            raise ValueError(f"Invalid currency code `{raw}` in Lunar CSV input")
+            raise ValueError(f"Invalid currency code `{raw}` in Santander Totta CSV input")
         return currency

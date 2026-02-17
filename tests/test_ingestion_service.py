@@ -6,7 +6,14 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.orm import sessionmaker
 
-from app.adapters.contracts import AccountDTO, BalanceDTO, PositionDTO, TransactionDTO
+from app.adapters.contracts import (
+    AccountDTO,
+    AdapterCapabilities,
+    BalanceDTO,
+    InstitutionKind,
+    PositionDTO,
+    TransactionDTO,
+)
 from app.models.account import Account
 from app.models.audit_event import AuditEvent
 from app.models.balance import Balance
@@ -19,6 +26,8 @@ from app.services.ingestion import IngestionService, UnknownSourceError
 
 class _SuccessfulAdapter:
     provider_code = "TEST_OK"
+    institution_kind = InstitutionKind.BROKER
+    capabilities = AdapterCapabilities()
     snapshot_utc = datetime(2026, 1, 15, 12, 0, tzinfo=timezone.utc)
     settled_utc = datetime(2026, 1, 13, 12, 0, tzinfo=timezone.utc)
 

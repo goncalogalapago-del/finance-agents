@@ -8,7 +8,9 @@ from typing import Any
 
 from app.adapters.contracts import (
     AccountDTO,
+    AdapterCapabilities,
     BalanceDTO,
+    InstitutionKind,
     PositionDTO,
     ReadOnlyFinanceAdapter,
     TransactionDTO,
@@ -17,6 +19,8 @@ from app.adapters.contracts import (
 
 class SaxoCsvReadOnlyAdapter(ReadOnlyFinanceAdapter):
     provider_code = "SAXO"
+    institution_kind = InstitutionKind.BROKER
+    capabilities = AdapterCapabilities()
 
     def __init__(self, *, csv_dir: str) -> None:
         self._csv_dir = Path(csv_dir).expanduser()

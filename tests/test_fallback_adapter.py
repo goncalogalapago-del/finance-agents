@@ -5,13 +5,22 @@ from decimal import Decimal
 
 import pytest
 
-from app.adapters.contracts import AccountDTO, BalanceDTO, PositionDTO, TransactionDTO
+from app.adapters.contracts import (
+    AccountDTO,
+    AdapterCapabilities,
+    BalanceDTO,
+    InstitutionKind,
+    PositionDTO,
+    TransactionDTO,
+)
 from app.adapters.fallback import FallbackReadOnlyAdapter
 
 
 class _Adapter:
     def __init__(self, *, provider_code: str, fail_methods: set[str] | None = None) -> None:
         self.provider_code = provider_code
+        self.institution_kind = InstitutionKind.BROKER
+        self.capabilities = AdapterCapabilities()
         self.fail_methods = fail_methods or set()
         self.calls: list[str] = []
 

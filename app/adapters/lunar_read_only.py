@@ -10,7 +10,9 @@ from uuid import uuid4
 
 from app.adapters.contracts import (
     AccountDTO,
+    AdapterCapabilities,
     BalanceDTO,
+    InstitutionKind,
     PositionDTO,
     ReadOnlyFinanceAdapter,
     TransactionDTO,
@@ -32,6 +34,8 @@ class _HttpClient(Protocol):
 
 class LunarReadOnlyAdapter(ReadOnlyFinanceAdapter):
     provider_code = "LUNAR"
+    institution_kind = InstitutionKind.BANK
+    capabilities = AdapterCapabilities(supports_positions=False)
     _REQUIRED_SCOPE = "PSP_AI"
     _FORBIDDEN_SCOPE = "PSP_PI"
 

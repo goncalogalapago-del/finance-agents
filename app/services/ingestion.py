@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.adapters.contracts import (
     AccountDTO,
     BalanceDTO,
+    InstitutionKind,
     PositionDTO,
     ReadOnlyFinanceAdapter,
     TransactionDTO,
@@ -245,7 +246,10 @@ class IngestionService:
         positions: list[PositionDTO],
         transactions: list[TransactionDTO],
     ) -> None:
-        institution = self._upsert_institution(provider_code=adapter.provider_code)
+        institution = self._upsert_institution(
+            provider_code=adapter.provider_code,
+            institution_kind=adapter.institution_kind,
+        )
         account_ids = self._upsert_accounts(institution_id=institution.id, accounts=accounts)
         instrument_currencies = self._build_instrument_currency_map(
             accounts=accounts,
@@ -269,17 +273,26 @@ class IngestionService:
             transactions=transactions,
         )
 
-    def _upsert_institution(self, *, provider_code: str) -> Institution:
+    def _upsert_institution(
+        self, *, provider_code: str, institution_kind: InstitutionKind
+    ) -> Institution:
         code = provider_code.strip().upper()
         institution = self.db.scalar(select(Institution).where(Institution.provider_code == code))
+        institution_type = (
+            InstitutionType.BROKER
+            if institution_kind == InstitutionKind.BROKER
+            else InstitutionType.BANK
+        )
         if institution is None:
             institution = Institution(
                 name=code,
-                type=InstitutionType.BROKER,
+                type=institution_type,
                 provider_code=code,
             )
             self.db.add(institution)
             self.db.flush()
+        else:
+            institution.type = institution_type
         return institution
 
     def _upsert_accounts(

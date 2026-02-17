@@ -4,7 +4,9 @@ from decimal import Decimal
 
 from app.adapters.contracts import (
     AccountDTO,
+    AdapterCapabilities,
     BalanceDTO,
+    InstitutionKind,
     PositionDTO,
     ReadOnlyFinanceAdapter,
     TransactionDTO,
@@ -18,6 +20,8 @@ class FixtureReadOnlyAdapter(ReadOnlyFinanceAdapter):
     """Deterministic adapter used to wire ingestion flow before provider APIs."""
 
     provider_code = "FIXTURE"
+    institution_kind = InstitutionKind.BROKER
+    capabilities = AdapterCapabilities()
 
     def validate_read_only_scope(self) -> None:
         return None
