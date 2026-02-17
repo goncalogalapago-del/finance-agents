@@ -11,6 +11,13 @@ Milestone 1 scaffold is in place:
 - Append-only audit event service
 - CI for lint/type/test/dependency audit
 
+Milestone 2 (step 1) is in place:
+- Read-only adapter contracts
+- Shared retry/rate-limit HTTP client wrapper
+- Deterministic fixture adapter for ingestion wiring
+- `POST /jobs/ingestion/run` endpoint
+- Ingestion run + audit event tests
+
 ## Project Docs
 
 - `CONSTITUTION.md`
@@ -51,4 +58,13 @@ make test
 Run migrations with:
 ```bash
 alembic upgrade head
+```
+
+## Try Ingestion Endpoint
+
+Run:
+```bash
+curl -X POST "http://127.0.0.1:8000/jobs/ingestion/run" \
+  -H "Content-Type: application/json" \
+  -d '{"source":"fixture"}'
 ```

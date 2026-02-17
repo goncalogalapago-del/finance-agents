@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from sqlalchemy import JSON, BigInteger, DateTime, String, Text
+from sqlalchemy import JSON, BigInteger, DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -10,7 +10,9 @@ from app.db.base import Base
 class AuditEvent(Base):
     __tablename__ = "audit_events"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id_type = BigInteger().with_variant(Integer, "sqlite")
+
+    id: Mapped[int] = mapped_column(id_type, primary_key=True, autoincrement=True)
     event_type: Mapped[str] = mapped_column(String(128), nullable=False)
     event_time_utc: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc)
